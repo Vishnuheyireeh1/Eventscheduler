@@ -33,7 +33,7 @@ const AdminDashboard = () => {
     createdBy: adminEmail
   });
 
-  const API_URL = `${process.env.VITE_API_URL}/events`;
+  const API_URL = `${process.env.VITE_API_URL}`;
 
   // HELPER: Convert 24h string (14:30) to 12h string (02:30 PM)
   const formatTime12h = (timeStr) => {
@@ -45,18 +45,21 @@ const AdminDashboard = () => {
     return `${h}:${minutes} ${ampm}`;
   };
 
-  const fetchEvents = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get(API_URL);
-      setEvents(res.data);
-      setLoading(false);
-    } catch (err) {
-      console.error("Fetch error:", err);
-      toast.error("Failed to load events ");
-      setLoading(false);
-    }
-  };
+const fetchEvents = async () => {
+  try {
+    setLoading(true);
+    const res = await axios.get(API_URL);
+    // If your backend sends { data: [...] } use res.data
+    // If it sends { events: [...] } use res.data.events
+    setEvents(Array.isArray(res.data) ? res.data : []); 
+    setLoading(false);
+  } catch (err) {
+    console.error("Fetch error:", err);
+    setEvents([]); // Reset to empty array on error so it doesn't crash
+    toast.error("Failed to load events");
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchEvents();
@@ -64,26 +67,25 @@ const AdminDashboard = () => {
   }, [adminEmail]);
 
   // UPDATED: Logic for Latest and Oldest sorting
-  const filteredAndSortedEvents = useMemo(() => {
-    return events
-      .filter(event => 
-        event.date.includes(searchTerm) || 
-        event.title.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      .sort((a, b) => {
-        const dateA = new Date(`${a.date}T${a.startTime}`);
-        const dateB = new Date(`${b.date}T${b.startTime}`);
-        
-        if (sortBy === 'oldest') {
-          return dateA - dateB; // Date ascending
-        } else if (sortBy === 'latest') {
-          return dateB - dateA; // Date descending
-        } else if (sortBy === 'title') {
-          return a.title.localeCompare(b.title);
-        }
-        return 0;
-      });
-  }, [events, searchTerm, sortBy]);
+const filteredAndSortedEvents = useMemo(() => {
+  // Add Array.isArray check to prevent the crash bruh
+  if (!Array.isArray(events)) return []; 
+
+  return events
+    .filter(event => 
+      event.date.includes(searchTerm) || 
+      event.title.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      const dateA = new Date(`${a.date}T${a.startTime}`);
+      const dateB = new Date(`${b.date}T${b.startTime}`);
+      
+      if (sortBy === 'oldest') return dateA - dateB;
+      if (sortBy === 'latest') return dateB - dateA;
+      if (sortBy === 'title') return a.title.localeCompare(b.title);
+      return 0;
+    });
+}, [events, searchTerm, sortBy]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
