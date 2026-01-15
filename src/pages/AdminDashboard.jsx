@@ -33,7 +33,7 @@ const AdminDashboard = () => {
     createdBy: adminEmail
   });
 
-  const API_URL = 'http://localhost:5000/api/events';
+  const API_URL = `${process.env.VITE_API_URL}/events`;
 
   // HELPER: Convert 24h string (14:30) to 12h string (02:30 PM)
   const formatTime12h = (timeStr) => {

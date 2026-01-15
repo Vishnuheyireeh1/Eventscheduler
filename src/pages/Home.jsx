@@ -18,7 +18,7 @@ const Home = () => {
   const [sortOrder, setSortOrder] = useState('oldest');
   const [loading, setLoading] = useState(true);
 
-  const API_URL = 'http://localhost:5000/api/events';
+  const API_URL = `${process.env.VITE_API_URL}/events`;
 
   // HELPER: Convert a Date object to "YYYY-MM-DD" in LOCAL time bruh
   const getLocalDateString = (date) => {
