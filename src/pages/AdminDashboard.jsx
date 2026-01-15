@@ -33,7 +33,7 @@ const AdminDashboard = () => {
     createdBy: adminEmail
   });
 
-  const API_URL = `${process.env.VITE_API_URL}`;
+  const API_URL = import.meta.env.VITE_API_URL;
 
   // HELPER: Convert 24h string (14:30) to 12h string (02:30 PM)
   const formatTime12h = (timeStr) => {
